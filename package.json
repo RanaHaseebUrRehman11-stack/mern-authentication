@@ -1,0 +1,20 @@
+{
+  "name": "vehicle-service-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MERN vehicle service management system with authentication and an admin dashboard",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n server,client -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "start:server": "npm --prefix server start",
+    "start:client": "npm --prefix client run dev",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test",
+    "build": "npm --prefix client run build",
+    "lint": "npm --prefix client run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
