@@ -6,8 +6,15 @@ import {
     useMemo,
     useState
 } from "react";
+import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 
 const ToastContext = createContext(null);
+
+const TOAST_ICONS = {
+    success: CheckCircle2,
+    error: AlertCircle,
+    info: Info
+};
 
 let idCounter = 0;
 
@@ -42,22 +49,29 @@ export function ToastProvider({ children }) {
             {children}
 
             <div className="toast-stack" role="status" aria-live="polite">
-                {toasts.map((toast) => (
-                    <div
-                        key={toast.id}
-                        className={`toast toast-${toast.type}`}
-                    >
-                        <span>{toast.message}</span>
-                        <button
-                            type="button"
-                            className="toast-close"
-                            aria-label="Dismiss notification"
-                            onClick={() => remove(toast.id)}
+                {toasts.map((toast) => {
+                    const Icon = TOAST_ICONS[toast.type] || Info;
+
+                    return (
+                        <div
+                            key={toast.id}
+                            className={`toast toast-${toast.type}`}
                         >
-                            &times;
-                        </button>
-                    </div>
-                ))}
+                            <span className="toast-icon" aria-hidden="true">
+                                <Icon size={18} strokeWidth={2} />
+                            </span>
+                            <span className="toast-message">{toast.message}</span>
+                            <button
+                                type="button"
+                                className="toast-close"
+                                aria-label="Dismiss notification"
+                                onClick={() => remove(toast.id)}
+                            >
+                                <X size={15} strokeWidth={2} />
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
         </ToastContext.Provider>
     );

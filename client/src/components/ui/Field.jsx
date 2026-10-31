@@ -1,6 +1,6 @@
 export function Field({ label, htmlFor, error, hint, className = "", children }) {
     return (
-        <div className={`field ${className}`.trim()}>
+        <div className={`field ${error ? "has-error" : ""} ${className}`.trim()}>
             {label && (
                 <label className="field-label" htmlFor={htmlFor}>
                     {label}
@@ -8,7 +8,11 @@ export function Field({ label, htmlFor, error, hint, className = "", children })
             )}
             {children}
             {hint && !error && <p className="field-hint">{hint}</p>}
-            {error && <p className="field-error">{error}</p>}
+            {error && (
+                <p className="field-error" role="alert">
+                    {error}
+                </p>
+            )}
         </div>
     );
 }

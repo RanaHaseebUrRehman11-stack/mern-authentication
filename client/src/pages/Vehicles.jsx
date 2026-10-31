@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { CarFront, Pencil, Plus, Trash2 } from "lucide-react";
+
 import api from "../services/api";
 import { Card } from "../components/ui/Card";
+import PageHeader from "../components/ui/PageHeader";
 import { Field, Input, Select } from "../components/ui/Field";
 import Button from "../components/ui/Button";
-import { Spinner, Alert, EmptyState } from "../components/ui/Feedback";
+import {
+    Spinner,
+    Alert,
+    EmptyState
+} from "../components/ui/Feedback";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { Table } from "../components/ui/Table";
 import { useToast } from "../contexts/ToastContext";
@@ -141,18 +148,33 @@ function Vehicles() {
 
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">My Vehicles</h1>
-                    <p className="page-subtitle">
-                        Register and manage the vehicles on your account.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Garage"
+                title="My Vehicles"
+                subtitle="Register and manage the vehicles on your account."
+                actions={
+                    <span className="header-chip">
+                        <CarFront
+                            size={15}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        {vehicles.length} registered
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
-            <Card title={editingId ? "Edit Vehicle" : "Register Vehicle"}>
+            <Card
+                title={editingId ? "Edit Vehicle" : "Register Vehicle"}
+                subtitle={
+                    editingId
+                        ? "Update the details for this vehicle"
+                        : "Add a vehicle to unlock service requests"
+                }
+                icon={editingId ? Pencil : Plus}
+            >
                 <form onSubmit={handleSubmit} className="form-grid">
                     <Field label="Vehicle Number" htmlFor="v-number">
                         <Input
@@ -227,13 +249,18 @@ function Vehicles() {
                 </form>
             </Card>
 
-            <Card title="Registered Vehicles">
+            <Card
+                title="Registered Vehicles"
+                subtitle="Everything currently in your garage"
+                icon={CarFront}
+            >
                 {loading ? (
                     <Spinner />
                 ) : vehicles.length === 0 ? (
                     <EmptyState
                         title="No vehicles yet"
                         message="Use the form above to register your first vehicle."
+                        icon={CarFront}
                     />
                 ) : (
                     <Table
@@ -248,13 +275,23 @@ function Vehicles() {
                     >
                         {vehicles.map((vehicle) => (
                             <tr key={vehicle._id}>
-                                <td className="mono">{vehicle.vehicleNumber}</td>
                                 <td>
-                                    {vehicle.company} {vehicle.model}
+                                    <span className="plate">
+                                        {vehicle.vehicleNumber}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className="list-title">
+                                        {vehicle.company} {vehicle.model}
+                                    </span>
                                 </td>
                                 <td>{vehicle.year}</td>
                                 <td>{vehicle.color}</td>
-                                <td>{vehicle.vehicleType}</td>
+                                <td>
+                                    <span className="chip">
+                                        {vehicle.vehicleType}
+                                    </span>
+                                </td>
                                 <td>
                                     <div className="row-actions">
                                         <Button
@@ -262,6 +299,11 @@ function Vehicles() {
                                             variant="secondary"
                                             onClick={() => startEdit(vehicle)}
                                         >
+                                            <Pencil
+                                                size={13}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
                                             Edit
                                         </Button>
                                         <Button
@@ -271,6 +313,11 @@ function Vehicles() {
                                                 setDeleteTarget(vehicle)
                                             }
                                         >
+                                            <Trash2
+                                                size={13}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
                                             Delete
                                         </Button>
                                     </div>

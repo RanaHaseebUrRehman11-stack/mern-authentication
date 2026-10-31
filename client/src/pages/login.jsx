@@ -1,22 +1,33 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+    ArrowLeft,
+    CarFront,
+    Eye,
+    EyeOff,
+    LockKeyhole,
+    ShieldCheck,
+    Wrench
+} from "lucide-react";
+
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { Field, Input } from "../components/ui/Field";
 import Button from "../components/ui/Button";
 import { Alert } from "../components/ui/Feedback";
+import AuthLayout from "../components/auth/AuthLayout";
 import { roleHome, roleLabel } from "../utils/roles";
 import "../styles/auth.css";
 
 const ROLE_CONTENT = {
     mechanic: {
-        icon: "\uD83D\uDD27",
+        icon: Wrench,
         title: "Mechanic Login",
         subtitle: "Sign in to manage your assigned jobs",
         note: "New mechanic accounts must be approved by an administrator before signing in. If your account is pending, please check back later."
     },
     admin: {
-        icon: "\uD83D\uDEE1",
+        icon: ShieldCheck,
         title: "Administrator Login",
         subtitle: "Restricted access for administrators",
         note: "Administrator accounts are provisioned by the system operator. New administrators can self-register with the administrator registration secret."
@@ -24,7 +35,7 @@ const ROLE_CONTENT = {
 };
 
 const DEFAULT_CONTENT = {
-    icon: "\uD83D\uDD12",
+    icon: LockKeyhole,
     title: "Welcome back",
     subtitle: "Login to continue",
     note: null
@@ -81,65 +92,37 @@ function Login({ expectedRole }) {
         }
     };
 
+    const visualPoints = isOwnerLogin
+        ? [
+              "View every vehicle on your account",
+              "Track requests from pending to complete",
+              "A permanent record of completed work"
+          ]
+        : [
+              "A workspace scoped to your role",
+              "Secure, session-based sign-in",
+              "Only the information you need"
+          ];
+
     return (
-        <div className="auth-page">
-            <div className="auth-card">
-                <div className="auth-header">
-                    <div className="auth-icon" aria-hidden="true">
-                        {content.icon}
-                    </div>
-                    <h1 className="auth-title">{content.title}</h1>
-                    <p className="auth-subtitle">{content.subtitle}</p>
-                </div>
-
-                {content.note && (
-                    <Alert type="info">{content.note}</Alert>
-                )}
-
-                <form onSubmit={handleLogin} noValidate>
-                    <Alert type="error">{error}</Alert>
-
-                    <Field label="Email" htmlFor="login-email">
-                        <Input
-                            id="login-email"
-                            type="email"
-                            autoComplete="email"
-                            placeholder="Enter email"
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                        />
-                    </Field>
-
-                    <Field label="Password" htmlFor="login-password">
-                        <div className="input-with-action">
-                            <Input
-                                id="login-password"
-                                type={showPassword ? "text" : "password"}
-                                autoComplete="current-password"
-                                placeholder="Enter password"
-                                value={password}
-                                onChange={(event) =>
-                                    setPassword(event.target.value)
-                                }
-                            />
-                            <button
-                                type="button"
-                                className="input-action"
-                                onClick={() =>
-                                    setShowPassword((value) => !value)
-                                }
-                            >
-                                {showPassword ? "Hide" : "Show"}
-                            </button>
-                        </div>
-                    </Field>
-
-                    <Button type="submit" loading={loading} className="btn-block">
-                        {loading ? "Logging in..." : "Login"}
-                    </Button>
-                </form>
-
-                {isOwnerLogin ? (
+        <AuthLayout
+            icon={content.icon}
+            title={content.title}
+            subtitle={content.subtitle}
+            note={content.note}
+            visualTitle={
+                isOwnerLogin
+                    ? "Your vehicles, services and history — in one place."
+                    : "The right workspace, with the right level of access."
+            }
+            visualText={
+                isOwnerLogin
+                    ? "Pick up where you left off, request the service you need and follow every update without chasing anyone."
+                    : "Sign in to a focused workspace with role-based access and a clear view of the work in front of you."
+            }
+            points={visualPoints}
+            footer={
+                isOwnerLogin ? (
                     <p className="auth-footer">
                         Don&apos;t have an account?{" "}
                         <Link to="/register" className="auth-link">
@@ -160,9 +143,97 @@ function Login({ expectedRole }) {
                             All sign-in options
                         </Link>
                     </p>
-                )}
+                )
+            }
+        >
+            <form className="auth-form" onSubmit={handleLogin} noValidate>
+                <Alert type="error">{error}</Alert>
+
+                <Field label="Email" htmlFor="login-email">
+                    <Input
+                        id="login-email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                    />
+                </Field>
+
+                <Field label="Password" htmlFor="login-password">
+                    <div className="input-with-action">
+                        <Input
+                            id="login-password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                        />
+                        <button
+                            type="button"
+                            className="input-action"
+                            aria-label={
+                                showPassword
+                                    ? "Hide characters"
+                                    : "Show characters"
+                            }
+                            title={
+                                showPassword
+                                    ? "Hide characters"
+                                    : "Show characters"
+                            }
+                            onClick={() =>
+                                setShowPassword((value) => !value)
+                            }
+                        >
+                            {showPassword ? (
+                                <EyeOff size={17} strokeWidth={1.9} />
+                            ) : (
+                                <Eye size={17} strokeWidth={1.9} />
+                            )}
+                        </button>
+                    </div>
+                </Field>
+
+                <Button
+                    type="submit"
+                    loading={loading}
+                    className="btn-block btn-lg"
+                >
+                    {loading ? "Logging in..." : "Login"}
+                </Button>
+            </form>
+
+            <div className="auth-switch">
+                <span>Not your workspace?</span>
+                <div className="auth-switch-links">
+                    <Link to="/login" className="auth-switch-link">
+                        <CarFront size={14} strokeWidth={2} aria-hidden="true" />
+                        Owner
+                    </Link>
+                    <Link to="/login/mechanic" className="auth-switch-link">
+                        <Wrench size={14} strokeWidth={2} aria-hidden="true" />
+                        Mechanic
+                    </Link>
+                    <Link to="/login/admin" className="auth-switch-link">
+                        <ShieldCheck
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        Admin
+                    </Link>
+                </div>
             </div>
-        </div>
+
+            <Link to="/" className="auth-back">
+                <ArrowLeft size={15} strokeWidth={2} aria-hidden="true" />
+                Back to home
+            </Link>
+        </AuthLayout>
     );
 }
 

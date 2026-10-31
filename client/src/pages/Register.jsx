@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff, UserRound } from "lucide-react";
+
 import api from "../services/api";
 import { Field, Input } from "../components/ui/Field";
 import Button from "../components/ui/Button";
 import { Alert } from "../components/ui/Feedback";
+import AuthLayout from "../components/auth/AuthLayout";
 import { useToast } from "../contexts/ToastContext";
 import "../styles/auth.css";
 
@@ -68,92 +71,110 @@ function Register() {
         }
     };
 
+    const passwordToggle = (
+        <button
+            type="button"
+            className="input-action"
+            aria-label={showPassword ? "Hide characters" : "Show characters"}
+            title={showPassword ? "Hide characters" : "Show characters"}
+            onClick={() => setShowPassword((value) => !value)}
+        >
+            {showPassword ? (
+                <EyeOff size={17} strokeWidth={1.9} />
+            ) : (
+                <Eye size={17} strokeWidth={1.9} />
+            )}
+        </button>
+    );
+
     return (
-        <div className="auth-page">
-            <div className="auth-card">
-                <div className="auth-header">
-                    <div className="auth-icon">&#128100;</div>
-                    <h1 className="auth-title">Create account</h1>
-                    <p className="auth-subtitle">Register to get started</p>
-                </div>
-
-                <form onSubmit={handleRegister} noValidate>
-                    <Alert type="error">{error}</Alert>
-
-                    <Field label="Username" htmlFor="reg-username">
-                        <Input
-                            id="reg-username"
-                            type="text"
-                            placeholder="Enter username"
-                            value={form.username}
-                            onChange={update("username")}
-                        />
-                    </Field>
-
-                    <Field label="Email" htmlFor="reg-email">
-                        <Input
-                            id="reg-email"
-                            type="email"
-                            autoComplete="email"
-                            placeholder="Enter email"
-                            value={form.email}
-                            onChange={update("email")}
-                        />
-                    </Field>
-
-                    <Field
-                        label="Password"
-                        htmlFor="reg-password"
-                        hint="At least 6 characters"
-                    >
-                        <div className="input-with-action">
-                            <Input
-                                id="reg-password"
-                                type={showPassword ? "text" : "password"}
-                                autoComplete="new-password"
-                                placeholder="Enter password"
-                                value={form.password}
-                                onChange={update("password")}
-                            />
-                            <button
-                                type="button"
-                                className="input-action"
-                                onClick={() =>
-                                    setShowPassword((value) => !value)
-                                }
-                            >
-                                {showPassword ? "Hide" : "Show"}
-                            </button>
-                        </div>
-                    </Field>
-
-                    <Field
-                        label="Confirm password"
-                        htmlFor="reg-confirm"
-                    >
-                        <Input
-                            id="reg-confirm"
-                            type={showPassword ? "text" : "password"}
-                            autoComplete="new-password"
-                            placeholder="Re-enter password"
-                            value={form.confirmPassword}
-                            onChange={update("confirmPassword")}
-                        />
-                    </Field>
-
-                    <Button type="submit" loading={loading} className="btn-block">
-                        {loading ? "Creating account..." : "Register"}
-                    </Button>
-                </form>
-
+        <AuthLayout
+            icon={UserRound}
+            title="Create account"
+            subtitle="Register to get started"
+            visualTitle="A better way to look after every vehicle."
+            visualText="Create your owner workspace to manage vehicles, request services and keep a complete history of work completed."
+            points={[
+                "Register vehicles in seconds",
+                "Request the exact service you need",
+                "Follow every request to completion"
+            ]}
+            footer={
                 <p className="auth-footer">
                     Already have an account?{" "}
                     <Link to="/login" className="auth-link">
                         Log in
                     </Link>
                 </p>
-            </div>
-        </div>
+            }
+        >
+            <form className="auth-form" onSubmit={handleRegister} noValidate>
+                <Alert type="error">{error}</Alert>
+
+                <Field label="Username" htmlFor="reg-username">
+                    <Input
+                        id="reg-username"
+                        type="text"
+                        placeholder="How should we address you?"
+                        value={form.username}
+                        onChange={update("username")}
+                    />
+                </Field>
+
+                <Field label="Email" htmlFor="reg-email">
+                    <Input
+                        id="reg-email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={form.email}
+                        onChange={update("email")}
+                    />
+                </Field>
+
+                <Field
+                    label="Password"
+                    htmlFor="reg-password"
+                    hint="At least 6 characters"
+                >
+                    <div className="input-with-action">
+                        <Input
+                            id="reg-password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="new-password"
+                            placeholder="Create a password"
+                            value={form.password}
+                            onChange={update("password")}
+                        />
+                        {passwordToggle}
+                    </div>
+                </Field>
+
+                <Field label="Confirm password" htmlFor="reg-confirm">
+                    <Input
+                        id="reg-confirm"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="Re-enter your password"
+                        value={form.confirmPassword}
+                        onChange={update("confirmPassword")}
+                    />
+                </Field>
+
+                <Button
+                    type="submit"
+                    loading={loading}
+                    className="btn-block btn-lg"
+                >
+                    {loading ? "Creating account..." : "Register"}
+                </Button>
+            </form>
+
+            <Link to="/" className="auth-back">
+                <ArrowLeft size={15} strokeWidth={2} aria-hidden="true" />
+                Back to home
+            </Link>
+        </AuthLayout>
     );
 }
 

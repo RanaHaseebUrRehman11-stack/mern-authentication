@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { CheckCircle2, History, Wrench } from "lucide-react";
+
 import api from "../services/api";
 import { Card } from "../components/ui/Card";
+import PageHeader from "../components/ui/PageHeader";
 import { Spinner, Alert, EmptyState } from "../components/ui/Feedback";
 import StatusBadge from "../components/ui/StatusBadge";
 import { Table } from "../components/ui/Table";
@@ -38,24 +41,36 @@ function ServiceHistory() {
 
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">Service History</h1>
-                    <p className="page-subtitle">
-                        Your completed service requests.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Records"
+                title="Service History"
+                subtitle="Your completed service requests."
+                actions={
+                    <span className="header-chip">
+                        <CheckCircle2
+                            size={15}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        {history.length} completed
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
-            <Card>
+            <Card
+                title="Completed Services"
+                subtitle="A permanent record for every vehicle"
+                icon={History}
+            >
                 {loading ? (
                     <Spinner />
                 ) : history.length === 0 ? (
                     <EmptyState
                         title="No completed services"
                         message="Completed service requests will appear here."
+                        icon={History}
                     />
                 ) : (
                     <Table
@@ -69,7 +84,20 @@ function ServiceHistory() {
                     >
                         {history.map((item) => (
                             <tr key={item._id}>
-                                <td>{item.serviceType}</td>
+                                <td>
+                                    <div className="table-primary">
+                                        <span className="list-avatar">
+                                            <Wrench
+                                                size={15}
+                                                strokeWidth={1.9}
+                                                aria-hidden="true"
+                                            />
+                                        </span>
+                                        <span className="list-title">
+                                            {item.serviceType}
+                                        </span>
+                                    </div>
+                                </td>
                                 <td>
                                     {item.vehicle?.vehicleNumber || "—"}
                                 </td>

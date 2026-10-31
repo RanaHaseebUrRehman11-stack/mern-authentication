@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { ClipboardList, RefreshCw, UserCog, Wrench } from "lucide-react";
+
 import api from "../../services/api";
 import { Card } from "../../components/ui/Card";
+import PageHeader from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
 import { Spinner, Alert, EmptyState } from "../../components/ui/Feedback";
@@ -105,26 +108,58 @@ function ManageRequests() {
         }
     };
 
+    const activeCount = requests.filter(
+        (request) =>
+            request.status !== "Completed" && request.status !== "Cancelled"
+    ).length;
+
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">Service Requests</h1>
-                    <p className="page-subtitle">
-                        Review, assign mechanics and update service status.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Operations"
+                title="Service Requests"
+                subtitle="Review, assign mechanics and update service status."
+                actions={
+                    <span className="header-chip">
+                        <ClipboardList
+                            size={15}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        {activeCount} active
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
-            <Card>
+            <Card
+                title="All Service Requests"
+                subtitle="Assign ownership and keep every status accurate"
+                icon={ClipboardList}
+                actions={
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={load}
+                        disabled={loading}
+                    >
+                        <RefreshCw
+                            size={13}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        Refresh
+                    </Button>
+                }
+            >
                 {loading ? (
                     <Spinner />
                 ) : requests.length === 0 ? (
                     <EmptyState
                         title="No service requests"
                         message="Customer requests will appear here."
+                        icon={ClipboardList}
                     />
                 ) : (
                     <Table
@@ -149,16 +184,28 @@ function ManageRequests() {
                             return (
                                 <tr key={request._id}>
                                     <td>
-                                        <span className="list-title">
-                                            {request.user?.username || "User"}
-                                        </span>
-                                        <span className="list-meta block">
-                                            {request.user?.email || ""}
-                                        </span>
+                                        <div className="table-primary">
+                                            <span className="avatar avatar-xs">
+                                                {request.user?.username
+                                                    ?.charAt(0)
+                                                    .toUpperCase() || "U"}
+                                            </span>
+                                            <div>
+                                                <span className="list-title">
+                                                    {request.user?.username ||
+                                                        "User"}
+                                                </span>
+                                                <span className="list-meta block">
+                                                    {request.user?.email || ""}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
-                                        {request.vehicle?.vehicleNumber ||
-                                            "—"}
+                                        <span className="plate">
+                                            {request.vehicle?.vehicleNumber ||
+                                                "—"}
+                                        </span>
                                     </td>
                                     <td>
                                         <span className="list-title">
@@ -172,8 +219,9 @@ function ManageRequests() {
                                         <StatusBadge status={request.status} />
                                     </td>
                                     <td>
-                                        <div className="row-actions">
+                                        <div className="row-actions row-actions-wrap">
                                             <Select
+                                                aria-label={`Assign mechanic for ${request.serviceType}`}
                                                 value={
                                                     row.mechanic ||
                                                     request.mechanic?._id ||
@@ -211,13 +259,19 @@ function ManageRequests() {
                                                     handleAssign(request)
                                                 }
                                             >
+                                                <UserCog
+                                                    size={13}
+                                                    strokeWidth={2}
+                                                    aria-hidden="true"
+                                                />
                                                 Assign
                                             </Button>
                                         </div>
                                     </td>
                                     <td>
-                                        <div className="row-actions">
+                                        <div className="row-actions row-actions-wrap">
                                             <Select
+                                                aria-label={`Update status for ${request.serviceType}`}
                                                 value={
                                                     row.status ||
                                                     request.status
@@ -249,6 +303,11 @@ function ManageRequests() {
                                                     handleStatus(request)
                                                 }
                                             >
+                                                <Wrench
+                                                    size={13}
+                                                    strokeWidth={2}
+                                                    aria-hidden="true"
+                                                />
                                                 Update
                                             </Button>
                                         </div>

@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+    ArrowRight,
+    CarFront,
+    CheckCircle2,
+    ClipboardList,
+    Plus,
+    Wrench
+} from "lucide-react";
+
 import api from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { Card, StatCard } from "../components/ui/Card";
-import { Spinner, Alert, EmptyState } from "../components/ui/Feedback";
+import PageHeader from "../components/ui/PageHeader";
+import {
+    Alert,
+    EmptyState,
+    SkeletonRows
+} from "../components/ui/Feedback";
 import StatusBadge from "../components/ui/StatusBadge";
 
 function Dashboard() {
@@ -60,28 +74,52 @@ function Dashboard() {
 
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">
-                        Welcome back, {user?.username}
-                    </h1>
-                    <p className="page-subtitle">
-                        Here is an overview of your vehicles and services.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Owner workspace"
+                title={`Welcome back, ${user?.username || "there"}`}
+                subtitle="Here is an overview of your vehicles and services."
+                actions={
+                    <Link
+                        to="/service-requests"
+                        className="btn btn-primary btn-md"
+                    >
+                        <Plus size={16} strokeWidth={2.2} aria-hidden="true" />
+                        New request
+                    </Link>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
             <div className="stat-grid">
-                <StatCard label="My Vehicles" value={vehicles.length} accent="blue" />
-                <StatCard label="Active Requests" value={activeRequests} accent="amber" />
-                <StatCard label="Completed" value={completedRequests} accent="green" />
+                <StatCard
+                    label="My Vehicles"
+                    value={vehicles.length}
+                    accent="blue"
+                    icon={CarFront}
+                    hint="Registered on your account"
+                />
+                <StatCard
+                    label="Active Requests"
+                    value={activeRequests}
+                    accent="amber"
+                    icon={ClipboardList}
+                    hint="Currently in the workflow"
+                />
+                <StatCard
+                    label="Completed"
+                    value={completedRequests}
+                    accent="green"
+                    icon={CheckCircle2}
+                    hint="Services finished"
+                />
             </div>
 
             <div className="grid-2">
                 <Card
                     title="Recent Service Requests"
+                    subtitle="Your latest activity"
+                    icon={ClipboardList}
                     actions={
                         <Link to="/service-requests" className="link">
                             View all
@@ -89,13 +127,17 @@ function Dashboard() {
                     }
                 >
                     {loading ? (
-                        <Spinner />
+                        <SkeletonRows rows={4} />
                     ) : recent.length === 0 ? (
                         <EmptyState
                             title="No service requests yet"
                             message="Create a service request to get started."
+                            icon={Wrench}
                             action={
-                                <Link to="/service-requests" className="link">
+                                <Link
+                                    to="/service-requests"
+                                    className="btn btn-primary btn-sm"
+                                >
                                     Create a request
                                 </Link>
                             }
@@ -104,18 +146,28 @@ function Dashboard() {
                         <ul className="list">
                             {recent.map((request) => (
                                 <li key={request._id} className="list-item">
-                                    <div>
-                                        <span className="list-title">
-                                            {request.serviceType}
+                                    <div className="list-item-main">
+                                        <span className="list-avatar">
+                                            <Wrench
+                                                size={16}
+                                                strokeWidth={1.9}
+                                                aria-hidden="true"
+                                            />
                                         </span>
-                                        <span className="list-meta">
-                                            {request.vehicle?.vehicleNumber ||
-                                                "Vehicle"}{" "}
-                                            &middot;{" "}
-                                            {new Date(
-                                                request.createdAt
-                                            ).toLocaleDateString()}
-                                        </span>
+                                        <div>
+                                            <span className="list-title">
+                                                {request.serviceType}
+                                            </span>
+                                            <span className="list-meta">
+                                                {request.vehicle
+                                                    ?.vehicleNumber ||
+                                                    "Vehicle"}{" "}
+                                                &middot;{" "}
+                                                {new Date(
+                                                    request.createdAt
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        </div>
                                     </div>
                                     <StatusBadge status={request.status} />
                                 </li>
@@ -126,6 +178,8 @@ function Dashboard() {
 
                 <Card
                     title="My Vehicles"
+                    subtitle="Your garage at a glance"
+                    icon={CarFront}
                     actions={
                         <Link to="/vehicles" className="link">
                             Manage
@@ -133,13 +187,17 @@ function Dashboard() {
                     }
                 >
                     {loading ? (
-                        <Spinner />
+                        <SkeletonRows rows={4} />
                     ) : vehicles.length === 0 ? (
                         <EmptyState
                             title="No vehicles registered"
                             message="Register a vehicle to request services."
+                            icon={CarFront}
                             action={
-                                <Link to="/vehicles" className="link">
+                                <Link
+                                    to="/vehicles"
+                                    className="btn btn-primary btn-sm"
+                                >
                                     Register a vehicle
                                 </Link>
                             }
@@ -148,14 +206,27 @@ function Dashboard() {
                         <ul className="list">
                             {vehicles.slice(0, 5).map((vehicle) => (
                                 <li key={vehicle._id} className="list-item">
-                                    <div>
-                                        <span className="list-title">
-                                            {vehicle.vehicleNumber}
+                                    <div className="list-item-main">
+                                        <span className="list-avatar">
+                                            <CarFront
+                                                size={16}
+                                                strokeWidth={1.9}
+                                                aria-hidden="true"
+                                            />
                                         </span>
-                                        <span className="list-meta">
-                                            {vehicle.company} {vehicle.model}
-                                        </span>
+                                        <div>
+                                            <span className="list-title">
+                                                {vehicle.vehicleNumber}
+                                            </span>
+                                            <span className="list-meta">
+                                                {vehicle.company}{" "}
+                                                {vehicle.model}
+                                            </span>
+                                        </div>
                                     </div>
+                                    <span className="chip">
+                                        {vehicle.vehicleType}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -164,12 +235,27 @@ function Dashboard() {
             </div>
 
             <div className="quick-actions">
-                <Link to="/vehicles" className="btn btn-primary btn-md">
-                    Register a vehicle
-                </Link>
-                <Link to="/service-requests" className="btn btn-secondary btn-md">
-                    New service request
-                </Link>
+                <div className="quick-actions-copy">
+                    <span className="eyebrow">Quick actions</span>
+                    <h2>Keep your service day moving</h2>
+                </div>
+                <div className="quick-actions-buttons">
+                    <Link to="/vehicles" className="btn btn-secondary btn-md">
+                        <CarFront size={16} strokeWidth={2} aria-hidden="true" />
+                        Register a vehicle
+                    </Link>
+                    <Link
+                        to="/service-requests"
+                        className="btn btn-primary btn-md"
+                    >
+                        New service request
+                        <ArrowRight
+                            size={16}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                    </Link>
+                </div>
             </div>
         </div>
     );

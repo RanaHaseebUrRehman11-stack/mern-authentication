@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { ClipboardList, Send, Wrench } from "lucide-react";
+
 import api from "../services/api";
 import { Card } from "../components/ui/Card";
+import PageHeader from "../components/ui/PageHeader";
 import { Field, Select, Textarea } from "../components/ui/Field";
 import Button from "../components/ui/Button";
-import { Spinner, Alert, EmptyState } from "../components/ui/Feedback";
+import {
+    Spinner,
+    Alert,
+    EmptyState
+} from "../components/ui/Feedback";
 import StatusBadge from "../components/ui/StatusBadge";
 import { Table } from "../components/ui/Table";
 import { useToast } from "../contexts/ToastContext";
@@ -112,24 +119,40 @@ function ServiceRequests() {
         }
     };
 
+    const activeCount = requests.filter(
+        (request) => request.status !== "Completed"
+    ).length;
+
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">Service Requests</h1>
-                    <p className="page-subtitle">
-                        Request a service for one of your vehicles.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Service desk"
+                title="Service Requests"
+                subtitle="Request a service for one of your vehicles."
+                actions={
+                    <span className="header-chip">
+                        <Wrench
+                            size={15}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        {activeCount} active
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
-            <Card title="New Service Request">
+            <Card
+                title="New Service Request"
+                subtitle="Tell us what your vehicle needs"
+                icon={Send}
+            >
                 {vehicles.length === 0 && !loading ? (
                     <EmptyState
                         title="No vehicles available"
                         message="Register a vehicle first before creating a service request."
+                        icon={Wrench}
                     />
                 ) : (
                     <form onSubmit={handleSubmit} className="form-grid">
@@ -183,6 +206,11 @@ function ServiceRequests() {
 
                         <div className="form-actions">
                             <Button type="submit" loading={saving}>
+                                <Send
+                                    size={15}
+                                    strokeWidth={2}
+                                    aria-hidden="true"
+                                />
                                 Submit request
                             </Button>
                         </div>
@@ -190,13 +218,18 @@ function ServiceRequests() {
                 )}
             </Card>
 
-            <Card title="My Requests">
+            <Card
+                title="My Requests"
+                subtitle="Every service request and its current state"
+                icon={ClipboardList}
+            >
                 {loading ? (
                     <Spinner />
                 ) : requests.length === 0 ? (
                     <EmptyState
                         title="No requests yet"
                         message="Your service requests will appear here."
+                        icon={ClipboardList}
                     />
                 ) : (
                     <Table
@@ -211,15 +244,28 @@ function ServiceRequests() {
                         {requests.map((request) => (
                             <tr key={request._id}>
                                 <td>
-                                    <span className="list-title">
-                                        {request.serviceType}
-                                    </span>
-                                    <span className="list-meta block">
-                                        {request.description}
-                                    </span>
+                                    <div className="table-primary">
+                                        <span className="list-avatar">
+                                            <Wrench
+                                                size={15}
+                                                strokeWidth={1.9}
+                                                aria-hidden="true"
+                                            />
+                                        </span>
+                                        <div>
+                                            <span className="list-title">
+                                                {request.serviceType}
+                                            </span>
+                                            <span className="list-meta block">
+                                                {request.description}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    {request.vehicle?.vehicleNumber || "—"}
+                                    {request.vehicle?.vehicleNumber
+                                        ? request.vehicle.vehicleNumber
+                                        : "—"}
                                 </td>
                                 <td>
                                     <StatusBadge status={request.status} />

@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+    Check,
+    KeyRound,
+    Pencil,
+    ShieldCheck,
+    Trash2,
+    UserPlus,
+    Wrench,
+    X
+} from "lucide-react";
+
 import api from "../../services/api";
 import { Card } from "../../components/ui/Card";
+import PageHeader from "../../components/ui/PageHeader";
 import { Field, Input, Select } from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
 import { Spinner, Alert, EmptyState } from "../../components/ui/Feedback";
@@ -227,20 +239,46 @@ function ManageMechanics() {
         }
     };
 
+    const pendingCount = mechanics.filter(
+        (mechanic) => (mechanic.approvalStatus || "Approved") !== "Approved"
+    ).length;
+
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">Mechanic Management</h1>
-                    <p className="page-subtitle">
-                        Add and manage the mechanics available for assignment.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Workshop network"
+                title="Mechanic Management"
+                subtitle="Add and manage the mechanics available for assignment."
+                actions={
+                    <span className="header-chip">
+                        <Wrench size={15} strokeWidth={2} aria-hidden="true" />
+                        {mechanics.length} mechanics
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
-            <Card title={editingId ? "Edit Mechanic" : "Add Mechanic"}>
+            {pendingCount > 0 && (
+                <div className="notice-strip">
+                    <ShieldCheck size={18} strokeWidth={2} aria-hidden="true" />
+                    <span>
+                        <strong>{pendingCount}</strong>{" "}
+                        {pendingCount === 1 ? "profile needs" : "profiles need"}{" "}
+                        review before workshop access is granted.
+                    </span>
+                </div>
+            )}
+
+            <Card
+                title={editingId ? "Edit Mechanic" : "Add Mechanic"}
+                subtitle={
+                    editingId
+                        ? "Update this workshop profile"
+                        : "Create a workshop profile and optionally a login"
+                }
+                icon={editingId ? Pencil : UserPlus}
+            >
                 <form onSubmit={handleSubmit} className="form-grid">
                     <Field label="Name" htmlFor="m-name">
                         <Input
@@ -351,22 +389,25 @@ function ManageMechanics() {
                 </form>
             </Card>
 
-            <Card title="Mechanics">
+            <Card
+                title="Mechanics"
+                subtitle="Profiles, approval status and login access"
+                icon={Wrench}
+            >
                 {loading ? (
                     <Spinner />
                 ) : mechanics.length === 0 ? (
                     <EmptyState
                         title="No mechanics yet"
                         message="Add your first mechanic using the form above."
+                        icon={Wrench}
                     />
                 ) : (
                     <Table
                         columns={[
                             "Name",
-                            "Email",
-                            "Phone",
+                            "Contact",
                             "Specialization",
-                            "Experience",
                             "Status",
                             "Approval",
                             "Login",
@@ -375,11 +416,33 @@ function ManageMechanics() {
                     >
                         {mechanics.map((mechanic) => (
                             <tr key={mechanic._id}>
-                                <td>{mechanic.name}</td>
-                                <td>{mechanic.email}</td>
-                                <td>{mechanic.phone}</td>
+                                <td>
+                                    <div className="table-primary">
+                                        <span className="avatar avatar-xs">
+                                            {mechanic.name
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+                                        </span>
+                                        <div>
+                                            <span className="list-title">
+                                                {mechanic.name}
+                                            </span>
+                                            <span className="list-meta block">
+                                                {mechanic.experience} yrs
+                                                experience
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span className="list-title">
+                                        {mechanic.email}
+                                    </span>
+                                    <span className="list-meta block">
+                                        {mechanic.phone}
+                                    </span>
+                                </td>
                                 <td>{mechanic.specialization}</td>
-                                <td>{mechanic.experience} yrs</td>
                                 <td>
                                     <StatusBadge status={mechanic.status} />
                                 </td>
@@ -394,6 +457,11 @@ function ManageMechanics() {
                                 <td>
                                     {mechanic.user ? (
                                         <span className="badge badge-completed">
+                                            <KeyRound
+                                                size={12}
+                                                strokeWidth={2.2}
+                                                aria-hidden="true"
+                                            />
                                             Linked
                                         </span>
                                     ) : (
@@ -401,7 +469,7 @@ function ManageMechanics() {
                                     )}
                                 </td>
                                 <td>
-                                    <div className="row-actions">
+                                    <div className="row-actions row-actions-wrap">
                                         {(mechanic.approvalStatus ||
                                             "Approved") !== "Approved" && (
                                             <Button
@@ -418,6 +486,11 @@ function ManageMechanics() {
                                                     )
                                                 }
                                             >
+                                                <Check
+                                                    size={13}
+                                                    strokeWidth={2.2}
+                                                    aria-hidden="true"
+                                                />
                                                 Approve
                                             </Button>
                                         )}
@@ -437,6 +510,11 @@ function ManageMechanics() {
                                                     )
                                                 }
                                             >
+                                                <X
+                                                    size={13}
+                                                    strokeWidth={2.2}
+                                                    aria-hidden="true"
+                                                />
                                                 Reject
                                             </Button>
                                         )}
@@ -448,6 +526,11 @@ function ManageMechanics() {
                                                     openAccountDialog(mechanic)
                                                 }
                                             >
+                                                <KeyRound
+                                                    size={13}
+                                                    strokeWidth={2.2}
+                                                    aria-hidden="true"
+                                                />
                                                 Create Login
                                             </Button>
                                         )}
@@ -456,6 +539,11 @@ function ManageMechanics() {
                                             variant="secondary"
                                             onClick={() => startEdit(mechanic)}
                                         >
+                                            <Pencil
+                                                size={13}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
                                             Edit
                                         </Button>
                                         <Button
@@ -465,6 +553,11 @@ function ManageMechanics() {
                                                 setDeleteTarget(mechanic)
                                             }
                                         >
+                                            <Trash2
+                                                size={13}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
                                             Delete
                                         </Button>
                                     </div>
@@ -505,6 +598,9 @@ function ManageMechanics() {
                         aria-label="Create login account"
                         onClick={(event) => event.stopPropagation()}
                     >
+                        <span className="modal-icon" aria-hidden="true">
+                            <KeyRound size={21} strokeWidth={2} />
+                        </span>
                         <h3 className="modal-title">Create Login Account</h3>
                         <p className="modal-message">
                             Set a password for {accountTarget.name} (

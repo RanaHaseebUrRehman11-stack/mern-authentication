@@ -15,7 +15,12 @@ const STATUS_CLASS = {
 function StatusBadge({ status }) {
     const className = STATUS_CLASS[status] || "badge-default";
 
-    return <span className={`badge ${className}`}>{status}</span>;
+    return (
+        <span className={`badge ${className}`}>
+            <span className="badge-dot" aria-hidden="true" />
+            {status}
+        </span>
+    );
 }
 
 export default StatusBadge;

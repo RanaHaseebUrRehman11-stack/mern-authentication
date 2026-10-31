@@ -1,13 +1,37 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
+import PublicFooter from "./navigation/PublicFooter";
+import DashboardLayout from "./navigation/DashboardLayout";
+import { useAuth } from "../contexts/AuthContext";
+import { FullPageLoader } from "./ui/Feedback";
 
 function Layout() {
+    const { isAuthenticated, initializing } = useAuth();
+    const { pathname } = useLocation();
+
+    if (initializing) {
+        return <FullPageLoader label="Restoring session..." />;
+    }
+
+    if (isAuthenticated) {
+        return <DashboardLayout />;
+    }
+
+    const isAuthRoute =
+        pathname.startsWith("/login") || pathname.startsWith("/register");
+
+    if (isAuthRoute) {
+        return <Outlet />;
+    }
+
     return (
-        <div className="app-shell">
+        <div className="public-shell">
+            <div className="public-glow" aria-hidden="true" />
             <Navbar />
-            <main className="app-main">
+            <main className="public-main">
                 <Outlet />
             </main>
+            <PublicFooter />
         </div>
     );
 }

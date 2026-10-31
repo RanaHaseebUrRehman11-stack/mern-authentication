@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, Play, Wrench } from "lucide-react";
+
 import api from "../../services/api";
 import { Card } from "../../components/ui/Card";
+import PageHeader from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
-import { Spinner, Alert, EmptyState } from "../../components/ui/Feedback";
+import {
+    Spinner,
+    Alert,
+    EmptyState
+} from "../../components/ui/Feedback";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { Table } from "../../components/ui/Table";
 import { useToast } from "../../contexts/ToastContext";
@@ -59,25 +66,59 @@ function MyJobs() {
     const visibleJobs =
         filter === "All" ? jobs : jobs.filter((job) => job.status === filter);
 
+    const counts = FILTERS.reduce((result, option) => {
+        result[option] =
+            option === "All"
+                ? jobs.length
+                : jobs.filter((job) => job.status === option).length;
+        return result;
+    }, {});
+
     return (
         <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">My Jobs</h1>
-                    <p className="page-subtitle">
-                        Jobs assigned to you. Update their progress here.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                eyebrow="Job queue"
+                title="My Jobs"
+                subtitle="Jobs assigned to you. Update their progress here."
+                actions={
+                    <span className="header-chip">
+                        <Wrench
+                            size={15}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
+                        {counts.Assigned || 0} waiting
+                    </span>
+                }
+            />
 
             <Alert type="error">{error}</Alert>
 
+            <div className="filter-chips" aria-label="Filter jobs">
+                {FILTERS.map((option) => (
+                    <button
+                        key={option}
+                        type="button"
+                        className={`filter-chip ${
+                            filter === option ? "active" : ""
+                        }`}
+                        onClick={() => setFilter(option)}
+                    >
+                        {option}
+                        <span>{counts[option] || 0}</span>
+                    </button>
+                ))}
+            </div>
+
             <Card
                 title="Assigned Jobs"
+                subtitle="Update each job as work progresses"
+                icon={Wrench}
                 actions={
                     <Select
                         value={filter}
                         onChange={(event) => setFilter(event.target.value)}
+                        aria-label="Filter jobs"
                     >
                         {FILTERS.map((option) => (
                             <option key={option} value={option}>
@@ -93,6 +134,7 @@ function MyJobs() {
                     <EmptyState
                         title="No jobs"
                         message="There are no jobs matching this filter."
+                        icon={Wrench}
                     />
                 ) : (
                     <Table
@@ -110,17 +152,24 @@ function MyJobs() {
 
                             return (
                                 <tr key={job._id}>
-                                    <td className="mono">
-                                        {job.vehicle?.vehicleNumber || "—"}
-                                    </td>
-                                    <td>{job.user?.username || "Owner"}</td>
                                     <td>
-                                        <span className="list-title">
-                                            {job.serviceType}
+                                        <span className="plate">
+                                            {job.vehicle?.vehicleNumber ||
+                                                "—"}
                                         </span>
-                                        <span className="list-meta block">
-                                            {job.description}
-                                        </span>
+                                    </td>
+                                    <td>
+                                        {job.user?.username || "Owner"}
+                                    </td>
+                                    <td>
+                                        <div className="table-primary column">
+                                            <span className="list-title">
+                                                {job.serviceType}
+                                            </span>
+                                            <span className="list-meta block">
+                                                {job.description}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td>
                                         <StatusBadge status={job.status} />
@@ -143,6 +192,11 @@ function MyJobs() {
                                                     )
                                                 }
                                             >
+                                                <Play
+                                                    size={13}
+                                                    strokeWidth={2}
+                                                    aria-hidden="true"
+                                                />
                                                 Start
                                             </Button>
                                         )}
@@ -158,6 +212,11 @@ function MyJobs() {
                                                     )
                                                 }
                                             >
+                                                <CheckCircle2
+                                                    size={13}
+                                                    strokeWidth={2}
+                                                    aria-hidden="true"
+                                                />
                                                 Complete
                                             </Button>
                                         )}
